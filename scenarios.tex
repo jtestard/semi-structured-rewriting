@@ -1,0 +1,57 @@
+In this section, we consider subclasses of queries from our section 3 rewriting. We show in proof 
+\jules{The above claim has not been confirmed yet, as all proofs are not yet provided}.
+
+For each subclass, we make assumption on the cardinalities of the result of the expressions $E$ and $F$. We also make assumptions on the number of distinct values $V(C,E)$ and $V(C,F)$. Note here that by value in this context we mean the set of values taken by every correlated attribute for a given tuple (i.e. $C^t = \{c_1^t, \dots, c_n^t\}$ for some given tuple $t$). 
+
+Each scenario considers a subset of the rewriting pattern seen in section 3.
+
+\subsubsection{Scenario 1}
+
+This scenario corresponds to cases where the query has a potentially small output 
+
+\begin{align}
+& \alpha_{P(e.c_1, \dots, e.c_n) \rightarrow N}(E_e) \\
+P : & \pi_{p_1,\dots,p_q}(\sigma_{e.c_1 = f.c_1 \vee \dots \vee e.c_n = f.c_n \vee w'}(F_f))& \nonumber
+\end{align}
+
+$E < M$
+
+\subsubsection{Scenario 2}
+
+\begin{align}
+& \alpha_{P(e.c_1, \dots, e.c_n) \rightarrow N}(E_e) \\
+P : & \pi_{p_1,\dots,p_q}(\lambda_l\tau_{o_1,\dots,o_l}(\sigma_{e.c_1 = f.c_1 \vee \dots \vee e.c_n = f.c_n}(F_f)))& \nonumber
+\end{align}
+
+\subsubsection{Scenario 3}
+
+We consider two scenarios which follows the same algebraic form, but different database instance characteristics. 
+
+\begin{align}
+& \alpha_{P(e.c_1, \dots, e.c_n) \rightarrow N}(E_e) \\
+P : & \pi_{p_1,\dots,p_q}(\gamma_{g;a(.) \rightarrow A}(\sigma_{e.c_1 = f.c_1 \vee \dots \vee e.c_n = f.c_n}(F_f)))& \nonumber
+\end{align}
+
+\subsubsection{Scenario 4}
+
+\begin{align}
+& \alpha_{P(e.c_1, \dots, e.c_n) \rightarrow N}(E_e) \\
+P : & \pi_{p_1,\dots,p_q}((\lambda_l\tau_{o_1,\dots,o_l}(\gamma_{g;a(.) \rightarrow A}(\sigma_{e.c_1 = f.c_1 \vee \dots \vee e.c_n = f.c_n}(F_f))))& \nonumber
+\end{align}
+
+In table \ref{tab:matching}, we describe how those scenarios relate to "real world" use cases.
+
+
+\begin{table}[]
+\centering
+\caption{Matching scenarios for each use case}
+\label{tab:matching}
+\begin{tabular}{|l|l|}
+\hline
+Use Case               & Matching Scenarios    \\ \hline
+Hadoop ETL              & $S3$ \\ \hline
+BDAS                    & $S4$ \\ \hline
+Analytics Visualization & $S1, S2$ \\ \hline
+Web Services \& APIs    & $S1, S2$ \\ \hline
+\end{tabular}
+\end{table}

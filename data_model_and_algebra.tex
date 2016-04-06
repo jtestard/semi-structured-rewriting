@@ -1,0 +1,110 @@
+% SQL++ Data Model
+
+In this paper, we use the SQL++ semi-structured data model and query language \cite{ong:2014aa}. We only retain here the most relevant features for our setting. The complete version of the language is available in \cite{ong:2014aa}.
+
+\subsection{The SQL++ data model}
+
+SQL++ queries input and output collections of values. Formally,  a {\em SQL++ value} is either
+\begin{compact_enum}
+	\item a {\em primitive value}, such as the string {\tt `abc'} or the integer {\tt 7}.
+	\item a {\em tuple} $\{ a_1: v_1, \ldots, a_n: v_n \}$, where the attribute names $a_1,\ldots,a_n$ are strings and each attribute value $v_i$ is a SQL++ value.
+	\item a {\em collection} $[ v_1, \ldots, v_n ]$, where each $v_i$ is recursively a SQL++ value. A collection may be ordered (then called an \emph{array}) or unordered (then called a \emph{bag}).
+	\item the {\tt null} value.
+%	\item the {\tt missing} value.
+\end{compact_enum}
+
+% SQL++ Query Language
+\subsection{The SQL++ Query Language}
+
+The SQL++ language is backwards compatible with SQL. As such, we define its semantics by \emph{removing} semantic restrictions from SQL:
+
+\begin{itemize}
+\item Unlike SQL's \texttt{FROM} clause variables, which bind to tuples
+only, the \texttt{FROM} clause variables of SQL++ may bind to any
+arbitrary SQL++ value.
+\item  SQL++ is fully composable in the sense that subqueries
+can appear anywhere, potentially creating nested results
+when they appear in the \texttt{SELECT} clause.
+\item Unlike SQL's aggregate functions which output scalar values, SQL++'s aggregate function may output any value. Of particular interest to the optimizations presented in this paper is the \texttt{NEST}($e$) function, whose output is a collection. Formally, just like any aggregate function, it is evaluated on each group created by \texttt{GROUP BY} clause. For each group, it returns a collection in which each element corresponds to the evaluation of expression $e$ for one tuple of the group.
+\item Since SQL++ tuples may have attributes whose value is itself a tuple with attribute of its own, SQL++ allows path navigation of arbitrary depth. Formally, a \emph{tuple path navigation} $t.a$ from a tuple $t$ with existing attribute $a$ returns the value of $a$ in $t$. If $a$ does not exists in $t$, then $t.a$ returns the \texttt{null} value. \jules{I don't believe \texttt{MISSING} is required for this rewriting.}
+\end{itemize}
+
+\textbf{Tuple-at-a-time and Set-at-a-time nesting} Notice that a SQL++ query that produces nested collections can be formulated in two ways: either using a nested query in the \texttt{SELECT} clause, or using the \texttt{NEST()} aggregate function. In the first case, the nested query evaluating to a nested collection is evaluated for each tuple of the main query individually, and therefore we call this query formulation tuple-at-a-time nesting. In the second case, the nested collections are created all at once by the \texttt{GROUP BY} clause, and therefore we call this query formulation set-at-a-time nesting.
+
+\subsection{The query pattern}
+
+We consider here SQL++ queries which exhibit the following pattern :
+
+% We could show how SQL++ running examples belong to the query pattern.
+\lstinputlisting[language=SQL,label={list:query-pattern},caption={Query Pattern},escapeinside={(*}{*)}]{code/query_pattern.sql}
+
+On listing \ref{list:query-pattern}, we denote lines 1, 15 and 16 to be the \emph{outer query}, and lines 2-14 to be the \emph{inner query}. The \texttt{SELECT} clause items other than the inner query and the SQL clauses below and including the outer query's \texttt{FROM} clause may contain any arbitrary SQL++ expression, thus are only shown as $\dots$ on the code fragment above. 
+The inner query has the following characteristics:
+
+% The query pattern should exhibit the characterization of the rewriting.
+\begin{enumerate}
+\item the variables produced by the outer query which may be in any SQL++ expression in the inner query. We will denote those variables as $c_1, \dots, c_n$. 
+\item \jules{@Yannis: The original draft for this paper also included in the input pattern to the rewriting a list of zero of more assignments $CS_1 \leftarrow E_1, \dots, CS_p \leftarrow E_p$ in which $E_1, \dots, E_p$ are plans, possibly correlated with variables from the outer plan. I left them out here. We could add them through a \texttt{WITH} clause in the query pattern.}
+\item The inner query may contain any of the following SQL++ clauses : \texttt{WHERE}, \texttt{GROUP BY}, \texttt{PARTITION BY}, \texttt{HAVING}, \texttt{ORDER BY}, \texttt{LIMIT}. Moreover, the items in any of those clauses may be any arbitrary SQL++ expression. \jules{@Yannis: the \texttt{OVER} and \texttt{PARTITION BY} clauses on figure \ref{list:query-pattern} are not mentioned in the SQL++ query language paper \cite{ong:2014aa}. I don't know if we can just put them there without further introduction.}
+\item In the \texttt{SELECT} clause, expressions $a_1, \dots, a_m, w_1, \dots, w_l$ may be arbitrary SQL++ aggregation functions bound to variables $A_1, \dots, A_m, W_1, \dots, W_l$ respectively. Moreover, $P_1, \dots, P_k$ may be any nested queries bound to variables $N_1, \dots, N_k$ (These won't be rewritten away by the rule, and need subsequent calls to the rewriting rule to be removed from the plan.). Finally, $p_1, \dots, p_q$ may be arbitrary expressions bound to variables $u_1, \dots, u_q$.
+\item The \texttt{FROM} clause expression $\hat{F}(c_1, \dots, c_n)$ may either be: (i) a single from item (name of a stored collection, collection literal, variable/path navigation mapped to a collection or a subquery) or (ii) any kind of join (\texttt{LEFT|RIGHT|FULL INNER|OUTER|CROSS JOIN}) (for conciseness we consider the cross product a special kind of join) between two items supported in the \texttt{FROM} clause, recursively. In both cases, if some from items are themselves subqueries or joins, these subqueries can be correlated through the attributes $c_1, \dots, c_n$. 
+\end{enumerate}
+
+
+% SQL++ Operators
+
+\subsection{The SQL++ Algebra}
+
+% SQL++ is a semi-structured query language which 
+We present here an algebra for SQL++. This is a purely logical algebra, and physical execution of this algebra is discussed further in section 5. An algebraic plan $P = T_1 \leftarrow e_1 ; \ldots ; T_n \leftarrow e_n; e$ starts with a list of zero or more assignments $T_i \leftarrow e_i$, where each $T_i$ is a {\em temporary result} and each $e_i$ is a SQL++ algebra expression that may use the previously computed temporaries $T_1, \ldots, T_{i-1}$. The result of $P$ is the SQL++ collection resulting from the evaluation of the {\em result expression} $e$, which may use any temporary $T_1, \ldots, T_n$.
+
+% Maybe discuss logical plan here
+The algebraic operators involved in the SQL++ algebra expressions input and output a collection (called binding collection) of tuples (called binding tuples). This collection may be ordered (then called an array) or unordered (then called a bag). Each binding tuple maps accessible variables (i.e. variables in the scope) to their corresponding value. Each value may itself by any SQL++ value (including a tuple or a collection).
+
+The majority of SQL++ algebra operators are extensions of operators well-known from conventional SQL processing (cf. textbooks \cite{Garcia-Molina:2008:DSC:1450931}). While conventional operators input and output collection of tuples with primitive or scalar attribute values, SQL++ extends algebraic operators to allow the binding attribute values to also be tuples and collections.
+
+The list of standard operators comprises CartesianProduct (or CrossProduct) $\crossproduct$, Union $\cup$, Intersection $\cap$, Difference $-$, Selection $\select_c$, InnerJoin $\innerjoin_c$, FullOuterJoin $\fullouterjoin_c$, LeftOuterJoin $\leftouterjoin_c$, SemiJoin $\semijoin_c$, AntiSemiJoin $\antisemijoin_c$, Projection $\project_{p_1 \rightarrow u_1, \dots, p_q \rightarrow u_q}$, Sort $\sort_{o_1, \dots, o_j}$ (where $o_1, \dots, o_j$ is the list of ordering terms, which initially appears in the SQL++ \texttt{ORDER BY} clause), limit $\lambda_l$ (which outputs the first $l$ binding tuples of its input), duplicate elimination $\distinct$, group-by $\groupby_{g_1, \dots, g_i; a_1(.) \rightarrow A_1, \ldots, a_m(.) \rightarrow A_m}$ (where $g_1, \dots, g_i$ is the list of grouping terms, which initially appears in the \texttt{GROUP BY} clause and $a_1, \ldots, a_m$ are the aggregate functions, which initially appear in the \texttt{HAVING} and \texttt{SELECT} clauses).
+
+In the remainder, given a binding tuple $t$, an attribute name $a$ that is not already the name of a binding attribute of $t$ and a value $v$, the notation $t\#{a : v}$ denotes the tuple that has all the attribute name/value pairs of $t$ as well as the attribute name $a$ mapped to the value $v$.
+
+The \textbf{Ground} operator $\ground$ is the only accepted leaf of a plan. It always outputs a single empty binding tuple $\{ \}$. 
+
+The \textbf{Scan} operator $\scanop_{S \mapsto s}$ is used to iterate over collections. For each input binding tuple $t$, it iterates over the collection $C$ bound to $S$ and for each element $v \in S$, it outputs the binding tuple $t \# \{ s:v \}$. Notice that if the child of Scan is a Ground, it really behaves like an iterator over the collection $S$ (in such cases we do not write Ground explicitly, for conciseness). However, if it is any other operator (e.g. another Scan), it unnests the collection $C$ with respect to each input binding tuple.
+
+The \textbf{ApplyPlan} operator $\applyplan_{P \mapsto N}$ is the algebraic counterpart of tuple-at-a-time nesting. For each input binding tuple $t$, the ApplyPlan operator evaluates the plan $P$ to a value $v$ and outputs the tuple $t \# \{ N: v \}$. In general, $P$ is a correlated plan $P(t)$, such that variables of the input binding tuples appear as \textit{parameters} in $P$ wherever constants or variables can appear in uncorrelated plans. In this case, each $v$ is the result of evaluating $P\backslash t$, i.e. the plan $P$ in which all the parameters have been replaced by their corresponding value for the current binding tuple $t$. Notice that if $P$ corresponds to a standard \texttt{SELECT} query, each $v$ is a collection and the ApplyPlan effectively nests a collection in every binding. If a SQL++ clause $C$ requires the evaluation of a nested query $SQ$ (e.g. $\texttt{SELECT (}SQ\texttt{) AS s ...}$), the algebraic translation $\operatorname{alg}(C)$ of this clause is composed of the corresponding SQL++ operator on top of an ApplyPlan (e.g. $\project_{\_v \mapsto s}(\applyplan_{\operatorname{alg}(SQ) \mapsto \_v}(\ldots))$). Notice that this corresponds to an eager evaluation of nested queries, since all the nested queries used by an operator are evaluated before the operator itself. This algebraic translation does not produce correct results when the nested queries are used by short-circuiting functions (e.g. \texttt{CASE WHEN}, \texttt{AND}) and possibly produce runtime errors (e.g. division by zero), but in our experience such use cases are very uncommon. The treatment of such nested queries are out of the scope of this paper.
+
+% SQL++ TAAT plan
+The \textbf{GroupBy} operator $\groupby_{g_1,\ldots,g_i; a_1(.) \mapsto A_1, \ldots, a_m(.) \mapsto A_m}$ behaves like SQL's grouping operator: it partitions the input binding tuples according to the evaluation $v_{g_1},\ldots, v_{g_i}$ of the grouping expressions $g_1,\ldots,g_i$, computes the evaluation $v_{A_1},\ldots,v_{A_m}$ of the aggregate functions $a_1,\ldots,a_m$ on each partition and outputs, for each partition, the binding tuple $\{g_1: v_{g_1}, \ldots, g_i: v_{g_i}, A_1: v_{A_1}, \ldots, A_m: v_{A_m}\}$. SQL++ extends SQL by allowing aggregate function that return complex values, such as the \texttt{NEST(}$e$\texttt{)} aggregate function. This particular function returns, for a given partition of input binding tuples, a collection of tuples which includes the evaluation $e(t)$ for each input binding tuple $t$ in that partition. Using \texttt{NEST()} as aggregate function in the GroupBy operator is the algebraic counterpart of set-at-a-time nesting. 
+
+Like in SQL, total aggregation queries, that is, queries with aggregations in the \texttt{SELECT} clause but no \texttt{GROUP BY} clause (e.g. \texttt{SELECT count(*) FROM customers}) correspond to a special version $\groupby^T_{a_1(.) \mapsto A_1, \ldots, a_m(.) \mapsto A_m}$ of the GroupBy operator. $\groupby^T_{a_1(.) \mapsto A_1, \ldots, a_m(.) \mapsto A_m}$ behaves like $\groupby_{a_1(.) \mapsto A_1, \ldots, a_m(.) \mapsto A_m}$ (a GroupBy operator without grouping attributes, that creates a single partition), with the following exception: if $\groupby$ inputs an empty binding bag, it outputs a empty binding bag, whereas if $\groupby^T$ inputs an empty binding bag, it outputs a binding bag with a single binding tuple containing default values $\operatorname{default}(f_i)$ for each aggregate function $f_1, \ldots, f_n$. For instance, $\operatorname{default}(\texttt{SUM()})$ is \texttt{null} and $\operatorname{default}(\texttt{COUNT()})$ is \texttt{0}.
+
+The \textbf{PartitionBy} operator $\partitionby_{x_1,\dots,x_{n1}; oc; w(.) \mapsto W}$ enables support of the SQL 2003  \texttt{PARTITION} feature and window functions. In addition, $\partitionby$ is important for the optimizations discussed in this paper, as one of them introduces a $\partitionby$ operator in the rewritten plan (cf. Section~\ref{sec:NSAAT}). Formally, $\partitionby$ (i) partitions the input binding tuples according to the evaluation $v_{x_1},\ldots,v_{x_{n1}}$ of the grouping expressions $x_1,\ldots,x_{n1}$ then (ii) sorts the binding tuples within each partition according to the optional \texttt{ORDER BY} clause $oc$ (identical to a standard SQL \texttt{ORDER BY} clause, but only sorts the bindings within each partition) then (iii) computes the evaluation $v_W$ of the window function $w$ for each binding tuple of each partition and finally (iv) outputs, for each binding tuple $t$ of each partition, the binding tuple $t\#\{W: v_W\}$. For example:
+
+\noindent \begin{tabular}{@{}c@{~~}c@{}}
+    $\chi_{\texttt{nation}; \tau_{\texttt{sales}, \texttt{DESC}} ; row\_number() \mapsto \texttt{rank}}$\\
+		$
+    \left(~
+    \begin{scriptsize}
+    \begin{array}{|@{~}c@{~}|@{~}c@{~}|@{~}c@{~}|}
+    \hline
+    \textbf{nation} & \textbf{name} & \textbf{sales} \\ \hline
+    \texttt{USA} & \texttt{Joe} & 6 \\ \hline
+    \texttt{China} & \texttt{Fu} & 4 \\ \hline
+    \texttt{China} & \texttt{Zhao} & 8 \\ \hline 
+    \end{array}
+    \end{scriptsize}
+    ~\right)
+    =$
+&
+    $\begin{scriptsize}
+    \begin{array}{|@{~}c@{~}|@{~}c@{~}|@{~}c@{~}|@{~}c@{~}|}
+    \hline
+    \textbf{nation} & \textbf{name} & \textbf{sales} & \textbf{rank} \\ \hline
+    \texttt{USA} & \texttt{Joe} & 6 & 1 \\ \hline
+    \texttt{China} & \texttt{Zhao} & 8 & 1\\ \hline
+    \texttt{China} & \texttt{Fu} & 4 & 2\\ \hline
+    \end{array}
+    \end{scriptsize}
+    $
+\\
+\end{tabular}\\

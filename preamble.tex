@@ -1,0 +1,236 @@
+
+
+%------------------------------------------------------------------------------- 
+% Math packages
+%------------------------------------------------------------------------------- 
+
+% The "amsmath" package provides advanced math extensions.
+\usepackage{amsmath}
+
+% The "amssymb" package adds new symbols to be used in math mode.
+\usepackage{amssymb}
+
+\usepackage{array}
+
+% The "amsthm" package adds the "proof" environment and "theoremstyle" command.
+% \usepackage{amsthm}
+
+% The "appendix" package is for appendices
+\usepackage[titletoc,toc,title]{appendix}
+
+\usepackage{makecell}
+\usepackage{array}
+\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{?}{!{\vrule width 1pt}}
+
+% Comments
+\newcommand{\jules}[1]{\reminder{\textcolor{blue}{\textbf{Jules: }}\textcolor{blue}{#1}}}
+\newcommand{\yannis}[1]{\reminder{\textcolor{red}{\textbf{Yannis: }}\textcolor{red}{#1}}}
+
+% For ceiling
+\usepackage{mathtools}
+\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+
+%------------------------------------------------------------------------------- 
+% Figure packages
+%------------------------------------------------------------------------------- 
+
+% The "fancyvrb" package provides advanced customization of verbatim environments, such as font families, numbering lines, box borders etc.
+% \usepackage{fancyvrb}
+
+% The "graphicx" package allows including external graphic files.
+\usepackage{graphicx}
+%\usepackage{circuitikz}
+
+% The "subfig" package allows multiple sub-figures within a single figure, where sub-figures can be separately captioned and labeled, e.g. Figure % 1.2(a). This is a replacement for the older "subfigure" package.
+\usepackage{subfig}
+
+% HACK: The caption package (included by the subfig package) requires a counter for ACM's copyright box.
+\newcounter{copyrightbox}
+
+% The "float" package allows the "H" option for figures, which places a float % at a precise location.
+\usepackage{float}
+
+% The "caption" package allows captions for figures that are not actually in a floating environment (e.g. framed environment).
+\usepackage{caption}
+
+% The "framed" package creates framed regions that can break across pages.
+\usepackage{framed}
+
+
+% The "algorithm2e" package provides keywords for typesetting algorithms. The "noend" option disables the printing of the "end" keywords. Use "algomargin" to decrease the margins for all algorithms.
+
+% Kevin: To resolve conflict of algorithm2e with other packages, a common problem with ACM template.
+% See http://ergodicthoughts.blogspot.com/2009/06/latex-too-many-s-algorithm2e.html
+\makeatletter
+\newif\if@restonecol
+\makeatother
+\let\algorithm\relax
+\let\endalgorithm\relax
+\usepackage[noend,linesnumbered]{algorithm2e}
+\setlength{\algomargin}{1.5em}
+
+%------------------------------------------------------------------------------- 
+% Layout packages
+%------------------------------------------------------------------------------- 
+
+% The "multirow" package allows table cells to span more than one row.
+\usepackage{multirow}
+
+% The "balance" package allows columns of the last page to be of equal height.
+\usepackage{balance}
+
+%------------------------------------------------------------------------------- 
+% Whitespace packages
+%------------------------------------------------------------------------------- 
+
+% The "savetrees" package saves space on a page.
+% \usepackage[all=normal,paragraphs=tight,floats=tight,bibnotes=tight]{savetrees}
+% \usepackage[all=normal,paragraphs=tight,floats=tight,bibnotes=tight,bibliography=tight]{savetrees}
+
+% The "setspace" package allows changing the inter-line spacing to be a multiple of the default line spacing.
+%\usepackage{setspace}
+%\setstretch{0.98}
+
+% The "titlesec" package allows changing the whitespace around section headings.
+% \usepackage[compact]{titlesec}
+
+%------------------------------------------------------------------------------- 
+% Misc packages
+%------------------------------------------------------------------------------- 
+
+% The "xcolor" package allows colored text and backgrounds.
+\usepackage[table]{xcolor}
+
+% The "soul" package allows highlighting.
+\usepackage{soul}
+\definecolor{gray}{rgb}{0.8,0.8,0.8}
+\sethlcolor{gray}
+
+
+% The "tocloft" packages allows generating custom lists that are similar to table of contents, list of figures etc.
+% \usepackage[subfigure]{tocloft}
+
+% The "hyperref" package allows creating hyperlinks. Note that it must be the last package loaded, and will automatically includes the "url" package.
+\usepackage{hyperref}
+
+% The "hypcap" package fixes "hyperref" so that hyperlinks go to the top of a float (as opposed to its caption).
+\usepackage[all]{hypcap}
+
+%------------------------------------------------------------------------------- 
+% Whitespace
+%------------------------------------------------------------------------------- 
+
+% Adjust whitespace above and below captions
+\addtolength{\abovecaptionskip}{-5pt}
+\addtolength{\belowcaptionskip}{-9pt}
+
+%------------------------------------------------------------------------------- 
+% Macros
+%------------------------------------------------------------------------------- 
+
+% Define our own compact enumerate
+\newenvironment{compact_enum}
+{\setlength{\leftmargini}{1em}
+\begin{enumerate}
+  \setlength{\labelsep}{.3em} 
+  \setlength{\itemsep}{.4em}
+  \setlength{\parskip}{0pt}
+  \setlength{\parsep}{0pt}}
+{\end{enumerate}}
+
+% Define our own compact itemize
+\newenvironment{compact_item}
+{\setlength{\leftmargini}{1em}
+\begin{itemize}
+  \setlength{\labelsep}{.3em} 
+  \setlength{\itemsep}{.4em}
+  \setlength{\parskip}{0pt}
+  \setlength{\parsep}{0pt}}
+{\end{itemize}}
+
+% \newtheorem{theorem}{Theorem}[section]
+% \newtheorem{lemma}[theorem]{Lemma}
+% \newtheorem{proposition}[theorem]{Proposition}
+% \newtheorem{corollary}[theorem]{Corollary}
+
+% \newenvironment{proof}[1][Proof]{\begin{trivlist}
+% \item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+% \newenvironment{definition}[1][Definition]{\begin{trivlist}
+% \item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{example}[1][Example]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+% \newenvironment{remark}[1][Remark]{\begin{trivlist}
+% \item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+
+% \newcommand{\qed}{\nobreak \ifvmode \relax \else
+%       \ifdim\lastskip<1.5em \hskip-\lastskip
+%       \hskip1.5em plus0em minus0.5em \fi \nobreak
+%       \vrule height0.75em width0.5em depth0.25em\fi}
+
+
+%------------------------------------------------------------------------------- 
+% Database symbols
+%------------------------------------------------------------------------------- 
+
+\def\ojoin{\setbox0=\hbox{$\bowtie$}%
+  \rule[-.02ex]{.25em}{.4pt}\llap{\rule[\ht0]{.25em}{.4pt}}}
+\def\smojoin{\setbox0=\hbox{$\bowtie$}%
+  \rule[-.068ex]{.20em}{.4pt}\llap{\rule[.742ex]{.20em}{.4pt}}}% small \ojoin for \smleftouterjoin
+\def\leftouterjoin{\mathbin{\ojoin\mkern-5.8mu\bowtie}}
+\def\smleftouterjoin{\mathbin{\smojoin\mkern-1.2mu\bowtie}}% small left outer join (for fractions)
+\def\rightouterjoin{\mathbin{\bowtie\mkern-5.8mu\ojoin}}
+\def\fullouterjoin{\mathbin{\ojoin\mkern-5.8mu\bowtie\mkern-5.8mu\ojoin}}
+\def\semijoin{\mbox{$\mathrel{\raise1pt\hbox{\vrule height5pt depth0pt\hskip-1.5pt$>$\hskip -2.5pt$<$}}$}}
+\def\antisemijoin{\overline{\semijoin}}
+\def\innerjoin{\bowtie}
+\def\crossproduct{\times}
+%\def\topk{\operatorname{Topk}}
+\def\topk{\lambda}
+\def\ground{\operatorname{Ground}}
+\def\scanop{\operatorname{Scan}}
+\def\nav{\operatorname{Nav}}
+\def\scannav{\operatorname{ScNa}}
+\def\optscan{\operatorname{OptScan}}
+\def\applyplan{\alpha}
+\def\groupby{\gamma}
+\def\partitionby{\chi}
+\def\project{\pi}
+\def\select{\sigma}
+\def\sort{\tau}
+\def\distinct{\delta}
+
+\def\func{\lambda}
+
+
+%------------------------------------------------------------------------------- 
+% Cost model macros
+%------------------------------------------------------------------------------- 
+
+\newcommand{\pcost}[1]{\operatorname{cost}\left(#1\right)} % cost of a plan evaluation
+\newcommand{\ncost}[1]{\operatorname{net}\left(#1\right)} % cost sending the result of #1 through the network
+\newcommand{\ccost}[2]{\operatorname{cost}\left(#1,#2\right)} % cost of a plan context evaluation
+\newcommand{\size}[1]{\##1} % size of a relation
+\newcommand{\tpr}[1]{\operatorname{tpr}\left(#1\right)} % tuple-per-read
+\newcommand{\fanout}[3]{\operatorname{fanout}\left(#1, #2, #3\right)} % fanout of #1 in #2 on #3
+\newcommand{\absfanout}[2]{\operatorname{fanout}\left(#1, #2\right)} % number of tuplesin #1 that match condition #2
+
+% Listing macros
+\usepackage[noend,linesnumbered]{algorithm2e}
+\usepackage{setspace} 
+\usepackage{listings}
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+\lstset{ %
+  backgroundcolor=\color{white},   % choose the background color
+  basicstyle=\footnotesize,        % size of fonts used for the code
+  breaklines=true,                 % automatic line breaking only at whitespace
+  captionpos=b,                    % sets the caption-position to bottom
+  commentstyle=\color{mygreen},    % comment style
+  escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
+  keywordstyle=\color{blue},       % keyword style
+  stringstyle=\color{mymauve},     % string literal style
+  numbers=left,
+  numberstyle=\tiny\color{mygray},
+}

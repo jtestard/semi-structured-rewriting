@@ -1,0 +1,37 @@
+\BOOKMARK [1][-]{section.1}{Introduction}{}% 1
+\BOOKMARK [1][-]{section.2}{Data Model and Algebra}{}% 2
+\BOOKMARK [2][-]{subsection.2.1}{The SQL++ data model}{section.2}% 3
+\BOOKMARK [2][-]{subsection.2.2}{The SQL++ Query Language}{section.2}% 4
+\BOOKMARK [2][-]{subsection.2.3}{The query pattern}{section.2}% 5
+\BOOKMARK [2][-]{subsection.2.4}{The SQL++ Algebra}{section.2}% 6
+\BOOKMARK [1][-]{section.3}{Algebraic Formulations}{}% 7
+\BOOKMARK [2][-]{subsection.3.1}{Tuple At A Time}{section.3}% 8
+\BOOKMARK [2][-]{subsection.3.2}{Normalized Set-at-a-time }{section.3}% 9
+\BOOKMARK [2][-]{subsection.3.3}{Denormalized Set-at-a-time}{section.3}% 10
+\BOOKMARK [1][-]{section.4}{Cost Model}{}% 11
+\BOOKMARK [2][-]{subsection.4.1}{Setup}{section.4}% 12
+\BOOKMARK [3][-]{subsubsection.4.1.1}{Execution Environment}{subsection.4.1}% 13
+\BOOKMARK [3][-]{subsubsection.4.1.2}{Notations}{subsection.4.1}% 14
+\BOOKMARK [3][-]{subsubsection.4.1.3}{Assumptions}{subsection.4.1}% 15
+\BOOKMARK [3][-]{subsubsection.4.1.4}{Operators considered}{subsection.4.1}% 16
+\BOOKMARK [3][-]{subsubsection.4.1.5}{Cost Breakdowns}{subsection.4.1}% 17
+\BOOKMARK [2][-]{subsection.4.2}{Scenarios}{section.4}% 18
+\BOOKMARK [3][-]{subsubsection.4.2.1}{Scenario 1: Large Reach, Small Output}{subsection.4.2}% 19
+\BOOKMARK [3][-]{subsubsection.4.2.2}{Scenario 2: Large Reach, Large Output}{subsection.4.2}% 20
+\BOOKMARK [2][-]{subsection.4.3}{Document Store}{section.4}% 21
+\BOOKMARK [3][-]{subsubsection.4.3.1}{Scenario 1}{subsection.4.3}% 22
+\BOOKMARK [3][-]{subsubsection.4.3.2}{Scenario 2}{subsection.4.3}% 23
+\BOOKMARK [2][-]{subsection.4.4}{Middleware}{section.4}% 24
+\BOOKMARK [3][-]{subsubsection.4.4.1}{Scenario 1}{subsection.4.4}% 25
+\BOOKMARK [3][-]{subsubsection.4.4.2}{Scenario 2}{subsection.4.4}% 26
+\BOOKMARK [1][-]{section.5}{Experimental Evaluation}{}% 27
+\BOOKMARK [1][-]{section.6}{Use Cases}{}% 28
+\BOOKMARK [2][-]{subsection.6.1}{Operational Intelligence}{section.6}% 29
+\BOOKMARK [2][-]{subsection.6.2}{Big Data Analytics System \(BDAS\)}{section.6}% 30
+\BOOKMARK [2][-]{subsection.6.3}{Analytics Visualization}{section.6}% 31
+\BOOKMARK [2][-]{subsection.6.4}{Online Web Services \046 APIs}{section.6}% 32
+\BOOKMARK [1][-]{section.7}{Related Work}{}% 33
+\BOOKMARK [1][-]{section.8}{References}{}% 34
+\BOOKMARK [1][-]{section*.12}{Appendices}{}% 35
+\BOOKMARK [1][-]{Appendix.a.A}{Appendix Cost Tables}{}% 36
+\BOOKMARK [1][-]{Appendix.a.B}{Appendix Examples}{}% 37

@@ -1,0 +1,181 @@
+\eat{
+We define the fanout of a selection $\sigma_w(R)$:
+
+$$ fanout(R, inner.c = outer.c) = \frac{V(inner.c,R)}{V(outer.c,R)} \#_f(R)$$
+
+\subsubsection{Assumptions}
+
+The result size of a join is expressed as follows:
+
+\begin{align*}
+& Size(Join(E,F,e.C = f.C \cap w)) = \#_f \frac{E F}{max(V(c,E),V(c,F))} s_{w}
+\end{align*}
+
+Next, we see the cost model from frames. For any expression $E$, we have:
+
+ We assume that the size of a disk block $B$ is equal to the size of a frame size. This way we have $SeqScan(R) = \ceil{\frac{R.T_R}{B}} = \ceil{\frac{R.T_R}{f_s}} = \#_f(R)$. 
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\eat{
+\begin{itemize}
+\centering
+\item \jules{Do we have hive-specific aggregation/sorting operators?}
+\jules{Note that middleware cannot execute if operator's input does not fit in memory.}
+\jules{For reduce-side join to work properly, add assumption that there is no skew in grouping keys}
+\end{itemize}
+}
+
+
+In the case of an index being used by a $Scan^{index}$ or $Join^{right\_index}$ operator, we assume this index is stored entirely in memory, and does not take space in the memory budget allocated for the query.
+
+We assume, for simplicity, in the scenarios that there is only one correlated attribute, thus the $w$ condition for join algorithms is simply $c_r = c_s$, where $c_r$ and $c_s$ attributes of $R$ and $S$, respectively. 
+
+On AsterixDB, grouping include an extra restriction that $R_g < m$. This is because AsterixDB does not have memory.
+
+% In figure \ref{table:ops-costs}, by $r.C = l.C$ we mean the expression $r.c_1 = l.c_1 \vee \dots \vee r.c_n = l.c_n$.
+
+In figure \ref{table:ops-costs} are given the individual costs for each physical operator. 
+
+(P), (A), (M) and (H) stand for PostgreSQL, AsterixDB, Middleware and Hive, respectively.
+
+Write cost is only paid if output is too large to fit in memory and is not the final result. Read cost is paid if input is not already in memory. In case of joins, if one of the inputs is already in memory but not both, then only the cost of reading the input not in memory is paid. Transform cost is paid if size of the input is greater than memory.
+
+Note that the selection $\sigma_w$, projection $\pi_p$ and limit $\lambda_l$ operators are always pipelined, which means their costs is already taken into account by their child operator in the query plan.
+
+We consider the join algorithms presented on table \ref{table:ops-costs} here to serve for both inner and left outer joins. 
+
+Let $M$ be the memory budget available to the operator considered. 
+
+We also consider that for every join operator $Join_*^*(R,S)$, $R$ is an expression 
+
+
+\subsection{Scenarios}
+
+We consider a variety of scenarios, which are representative of "real world" queries. Each scenario considers under 
+
+we make assumption on the cardinalities of the result of the expressions $E$ and $F$. We also make assumptions on the number of distinct values $V(C,E)$ and $V(C,F)$. Note here that by value in this context we mean the set of values taken by every correlated attribute for a given tuple (i.e. $C^t = \{c_1^t, \dots, c_n^t\}$ for some given tuple $t$).
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+\eat{
+We consider four scenarios. Each scenario is 
+
+Each scenario considers a subclass of the rewriting pattern seen in section 3. For each subclass, we make assumption on the cardinalities of the result of the expressions $E$ and $F$. We also make assumptions on the number of distinct values $V(C,E)$ and $V(C,F)$. Note here that by value in this context we mean the set of values taken by every correlated attribute for a given tuple (i.e. $C^t = \{c_1^t, \dots, c_n^t\}$ for some given tuple $t$). 
+
+\subsubsection{Scenario 1}
+
+This scenario corresponds to cases where the inner plan follows the 
+
+\begin{align}
+& \alpha_{P(e.c_1, \dots, e.c_n) \rightarrow N}(E_e) \\
+P : & \pi_{p_1,\dots,p_q}(\sigma_{e.c_1 = f.c_1 \vee \dots \vee e.c_n = f.c_n}(F_f))& \nonumber
+\end{align}
+
+\begin{itemize}
+\item $E < M$
+\item $F < M$
+\item $V(c,E) \leq V(c,F)$
+\end{itemize}
+
+
+\subsubsection{Scenario 2}
+
+\begin{align}
+& \alpha_{P(e.c_1, \dots, e.c_n) \rightarrow N}(E_e) \\
+P : & \pi_{p_1,\dots,p_q}(\lambda_l\tau_{o_1,\dots,o_l}(\sigma_{e.c_1 = f.c_1 \vee \dots \vee e.c_n = f.c_n}(F_f)))& \nonumber
+\end{align}
+
+\begin{itemize}
+\item $E < M$
+\item $F < M$
+\item $V(c,E) \leq V(c,F)$
+\end{itemize}
+
+% Output of plan from scenario 2 will contain only $l$ tuples.
+
+\subsubsection{Scenario 3}
+
+We consider two scenarios which follows the same algebraic form, but different database instance characteristics. 
+
+\begin{align}
+& \alpha_{P(e.c_1, \dots, e.c_n) \rightarrow N}(E_e) \\
+P : & \pi_{p_1,\dots,p_q}(\gamma_{g;a(.) \rightarrow A}(\sigma_{e.c_1 = f.c_1 \vee \dots \vee e.c_n = f.c_n}(F_f)))& \nonumber
+\end{align}
+
+"Small size" scenario ($S3_S$):
+\begin{itemize}
+\item $E < M$
+\item $F < M$
+\item $V(c,E) \leq V(c,F)$
+\end{itemize}
+
+"Large size" scenario ($S3_L$):
+
+\begin{itemize}
+\item $E > M$
+\item $F > M$
+\item $V(c,E) \leq V(c,F)$
+\end{itemize}
+
+\subsubsection{Scenario 4}
+
+\begin{align}
+& \alpha_{P(e.c_1, \dots, e.c_n) \rightarrow N}(E_e) \\
+P : & \pi_{p_1,\dots,p_q}((\lambda_l\tau_{o_1,\dots,o_l}(\gamma_{g;a(.) \rightarrow A}(\sigma_{e.c_1 = f.c_1 \vee \dots \vee e.c_n = f.c_n}(F_f))))& \nonumber
+\end{align}
+
+\begin{itemize}
+\item $E < M$
+\item $F > M$
+\item $V(c,E) \leq V(c,F)$
+\end{itemize}
+
+In table \ref{tab:matching}, we describe how those scenarios relate to "real world" use cases. 
+
+\begin{table}[]
+\centering
+\caption{Matching scenarios for each use case}
+\label{tab:matching}
+\begin{tabular}{|l|l|}
+\hline
+Use Case               & Matching Scenarios    \\ \hline
+Hadoop ETL              & $S3$ \\ \hline
+BDAS                    & $S4$ \\ \hline
+Analytics Visualization & $S1, S2$ \\ \hline
+Web Services \& APIs    & $S1, S2$ \\ \hline
+\end{tabular}
+\end{table}
+}
+
+
+
+\eat{
+% Please add the following required packages to your document preamble:
+% \usepackage{multirow}
+\begin{table}[]
+\centering
+\caption{Scenario 1}
+\label{table:scenario1}
+\begin{tabular}{|c|c|c|}
+\hline
+Rewriting & $V(c,F)$ & Cost \\ \hline
+\multirow{3}{*}{$R_0$} & $0 \leqslant \frac{1}{V(c,F)} \leqslant \frac{M f_s}{|F|}$ & $|E| \frac{|F|}{V(c,F)}$ \\ \cline{2-3} 
+ &  $\frac{M f_s}{|F|} \leqslant \frac{1}{V(c,F)} \leqslant \frac{1}{f_s}$ &  \\ \cline{2-3} 
+ &  $\frac{1}{f_s} \leqslant \frac{1}{V(c,F)} \leqslant 1$ &  \\ \hline
+\multirow{3}{*}{$R_2$} &  &  \\ \cline{2-3} 
+ &  $\frac{M f_s}{|F|} \leqslant \frac{1}{V(c,F)} \leqslant \frac{1}{f_s}$ &  \\ \cline{2-3} 
+ &  $\frac{1}{f_s} \leqslant \frac{1}{V(c,F)} \leqslant 1$ &  \\ \hline
+\multirow{3}{*}{$R_4$} &  &  \\ \cline{2-3} 
+ &  $\frac{M f_s}{|F|} \leqslant \frac{1}{V(c,F)} \leqslant \frac{1}{f_s}$ &  \\ \cline{2-3} 
+ &  $\frac{1}{f_s} \leqslant \frac{1}{V(c,F)} \leqslant 1$ &  \\ \hline
+\end{tabular}
+\end{table}
+}
+
+\pagebreak

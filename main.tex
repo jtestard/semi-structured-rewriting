@@ -1,0 +1,82 @@
+
+
+\documentclass{sig-alternate}
+
+\input{preamble}
+
+% Use either package to make commentary public or private. If commentary is
+% private, they will also be stripped by arxiv-sanitize.sh.
+\usepackage{commentary-public}
+%\usepackage{commentary-private}
+%------------------------------------------------------------------------------- 
+% Macros
+%------------------------------------------------------------------------------- 
+
+\begin{document}
+
+\title{Semi-structured Rewriting}
+
+\numberofauthors{2}
+    \author{
+    % 1st author
+    \alignauthor
+    Jules Testard\\
+         \affaddr{UC San Diego}\\
+         \email{jtestard@cs.ucsd.edu}
+    \alignauthor
+    Yannis Papakonstantinou\\
+         \affaddr{UC San Diego}\\
+         \email{yannis@cs.ucsd.edu}
+}
+
+
+\maketitle
+
+\begin{abstract}
+\input{abstract}
+\end{abstract}
+
+\section{Introduction}
+
+\input{introduction}
+
+\section{Data Model and Algebra}
+
+\input{data_model_and_algebra}
+
+\section{Algebraic Formulations}
+
+\input{algebraic_rewriting}
+
+
+% \section{Scenarios}
+
+% \input{scenarios}
+
+\section{Cost Model}
+
+\input{cost_model}
+
+\section{Experimental Evaluation}
+
+\input{experimental_evaluation}
+
+\section{Use Cases}
+
+\input{use_cases}
+
+\section{Related Work}
+
+\input{related_work}
+
+\bibliographystyle{abbrv}
+{
+%\scriptsize
+\bibliography{main}
+}
+
+\appendix
+
+\input{appendix}
+
+\end{document}
