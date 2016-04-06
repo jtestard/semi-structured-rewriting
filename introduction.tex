@@ -18,12 +18,7 @@ The execution that is closest to the query formulation is to compute the \texttt
 
 % \jules{Show existing work based on describing the DSAAT execution. Show how the partition by operations makes analytical queries possible. Show why performance sucks.}
 
-On figure \ref{fig:DSAAT_example} is shown an algebraic representation of the denormalized set-at-a-time execution. This execution plan improves on top of the work of May et al. \cite{may:2003aa} by providing set-at-a-time semantics for SQL++ analytical clauses \texttt{GROUP BY}, \texttt{ORDER BY} and \texttt{LIMIT} within the subquery.
-
-% Describe the DSAAT algebraic plan execution.
-The outer query's \texttt{FROM} and \texttt{LIMIT} clauses are processed on the left hand side of the left outer join, using the \texttt{LAMBDA. On the right hand side of the left outer join, the \texttt{FROM} clause of the subquery is processed. The left outer join then processes the subquery \texttt{SELECT} clause. 
-
-
+On figure \ref{fig:DSAAT_example} is shown an algebraic representation of the denormalized set-at-a-time execution. This execution plan improves on top of the work of May et al. \cite{may:2003aa} by providing set-at-a-time semantics for SQL++ analytical clauses \texttt{GROUP BY}, \texttt{ORDER BY} and \texttt{LIMIT} within the subquery. The portion of the plan below the left outer join or reminiscent of classic query decorrelation. The outer query's \texttt{FROM} and \texttt{LIMIT} clauses are processed on the left hand side of the left outer join, using the top-k ($\lambda_k$) operator. On the right hand side of the left outer join, the \texttt{FROM} clause of the subquery is processed. The left outer join then processes the subquery processes the subquery's \texttt{WHERE} clause predicate for all correlated attributes at once. The top portion of the algebraic plan allows the processing of the analytical clauses by : 1) the subquery's \texttt{GROUP BY} clause is processed using a $\gamma$ operator which groups on the primary key of $p1$, 2) \texttt{ORDER BY} and \texttt{LIMIT} clauses are processed using the windowing operator $\chi$ which computes row numbers for each partition, followed by a selection which filters rows whose row number is greater than the value of the \texttt{LIMIT} clause of the subquery. Finally, the creation of the \texttt{top\_web\_sales} collection is handled by the $\gamma_{\texttt{NEST()}}$ operator.
 
 \begin{figure}[h]
 \centering
@@ -31,8 +26,7 @@ The outer query's \texttt{FROM} and \texttt{LIMIT} clauses are processed on the 
 \includegraphics[width=1.05 \linewidth]{images/DSAAT_running-example.pdf}
 \end{figure}
 
-Notice that in the running example, there is a functional dependency from the correlated attribute \texttt{p\_item\_sk} to the attributes \texttt{p\_promo\_name} and \texttt{price} of \texttt{top\_web\_sales}. The $\leftouterjoin$ denormalizes intermediate results by joining on \texttt{p\_item\_sk}, thus introducing more non-correlated attributes from its left hand side. This creates two types of performance penalties: 1) horizontal redundancy 
-
+Notice that in the running example, there is a functional dependency from the correlated attribute \texttt{p\_item\_sk} to the attributes \texttt{p\_promo\_name} and \texttt{price} of \texttt{top\_web\_sales}. The $\leftouterjoin$ denormalizes intermediate results by joining on \texttt{p\_item\_sk}, thus introducing more non-correlated attributes from its left hand side. This creates two types of performance penalties: 1) horizontal redundancy: the $\leftouterjoin$ operator outputs unnecessarily wide tuples due to the additional $p1.p\_promo\_name$ attribute (which isn't used until the $\gamma_\texttt{NEST}$ operator), which increases the cost of the $\gamma_\texttt{SUM}$ and $\chi$ operators; 2) vertical redundancy: the $\leftouterjoin$ operator outputs redundant tuples if the correlated attribute $p1.p\_item\_sk$ is not unique, which also unnecessarily increases operator costs. Moreover, it introduces a requirement that the tuples from the output of left hand side of the left outer join be unique, since a key is required to process  the $\gamma$ and $\chi$ operators. In the running example, the key is $p1.p\_promo\_sk$.
 
 \jules{Show NSAAT and how it improves upon DSAAT by outlying performance improvements.}
 
